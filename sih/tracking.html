@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracking</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        #map{
+            width:100% ;
+            height: 100vh;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="map""></div>
+
+</body>
+</html>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+
+    // Map initialization
+    var map = L.map('map').setView([51.505, -0.09], 13);
+    // osm layer
+
+var osm= L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+});
+osm.addTo(map)
+
+// https://leaflet-extras.github.io/leaflet-providers/preview/
+// https://stackoverflow.com/questions/33343881/leaflet-in-google-maps
+var googleStreets = L.tileLayer('http://{s}.google.com/vt?lyrs=m&x={x}&y={y}&z={z}',{
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3']
+});
+googleStreets.addTo(map)
+
+
+
+// Marker
+var myIcon = L.icon({
+    iconUrl: 'red_marker.png',
+    iconSize: [38, 55],
+});
+
+if (!navigator.geolocation) {
+    console.log("Your browser doesn't support geolocation");
+} else {
+    setInterval(() =>{
+        navigator.geolocation.getCurrentPosition(getPosition)
+        },5000);
+}
+
+
+var myIcon = L.icon({
+    iconUrl: 'blue_marker.png',
+    iconSize: [38, 95],
+
+});
+var marker,circle;
+// Define a callback function to handle the geolocation result
+function getPosition(position) {
+    var lat = position.coords.latitude; // Get the latitude
+    var lng = position.coords.longitude; // Get the longitude
+    var accuracy = position.coords.accuracy;
+
+    if(marker){
+        map.removeLayer(marker)
+    }
+    if(circle){
+        map.removeLayer(circle)
+    }
+
+
+    marker = L.marker([lat,lng]);
+    circle = L.circle([lat,lng],{radius: accuracy});
+
+    // var featuregroup = L.featureGroup([marker,circle]).addTo(map);
+    // map.panTo({lat,lng});
+
+
+
+    // console.log("Latitude: " + lat + ", Longitude: " + lng,"Accuracy: "+ accuracy);
+    // marker.bindPopup(popupContent).openPopup();
+    // var popup = L.popup(latlng, {content: '<p>Your Location!</p>'}).openOn(map);
+    var popupContent = "Latitude: " + lat + "<br>Longitude: " + lng + "<br>Accuracy: " + accuracy;
+
+    // Set the popup content and open it on the marker
+    marker.bindPopup(popupContent).openPopup();
+
+    map.panTo([lat, lng]);
+
+    console.log("Latitude: " + lat + ", Longitude: " + lng, "Accuracy: " + accuracy);
+}
+
+
+
+</script>

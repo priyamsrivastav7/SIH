@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Detection with Leaflet.js</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        /* Set the map container's size */
+        #map {
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Source and Destination Input Fields -->
+    <div>
+        <label for="source">Source:</label>
+        <input type="text" id="source" placeholder="Enter source location">
+    </div>
+    <div>
+        <label for="destination">Destination:</label>
+        <input type="text" id="destination" placeholder="Enter destination location">
+        <button id="calculate-distance">Calculate Distance</button>
+    </div>
+
+    <!-- Display Distance -->
+    <div>
+        <p id="distance-result">Distance: <span id="distance-value">N/A</span> km</p>
+    </div>
+
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([51.505, -0.09], 13);
+
+        // Add a tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Get user location
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var userLocation = [position.coords.latitude, position.coords.longitude];
+                L.marker(userLocation).addTo(map)
+                    .bindPopup("Your Location").openPopup();
+                map.setView(userLocation, 13);
+            }, function(error) {
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        alert("User denied the request for Geolocation.");
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        alert("Location information is unavailable.");
+                        break;
+                    case error.TIMEOUT:
+                        alert("The request to get user location timed out.");
+                        break;
+                    case error.UNKNOWN_ERROR:
+                        alert("An unknown error occurred.");
+                        break;
+                }
+            });
+        } else {
+            alert("Geolocation is not supported by your browser");
+        }
+
+        // Calculate distance between source and destination
+        document.getElementById('calculate-distance').addEventListener('click', function() {
+            var sourceInput = document.getElementById('source').value;
+            var destinationInput = document.getElementById('destination').value;
+
+            // Convert source and destination to coordinates (you can use a geocoding service here)
+            var sourceCoords = [/* Latitude, Longitude */]; // Replace with actual coordinates or use geocoding
+            var destinationCoords = [/* Latitude, Longitude */]; // Replace with actual coordinates or use geocoding
+
+            // Calculate distance in kilometers (you can use a haversine formula or other methods)
+            var distance = calculateDistance(sourceCoords, destinationCoords);
+
+            // Update the distance result on the page
+            document.getElementById('distance-value').textContent = distance.toFixed(2); // Displaying distance with two decimal places
+        });
+
+        // Function to calculate distance between two coordinates (Haversine formula)
+        function calculateDistance(coords1, coords2) {
+            var lat1 = coords1[0];
+            var lon1 = coords1[1];
+            var lat2 = coords2[0];
+            var lon2 = coords2[1];
+
+            var R = 6371; // Earth's radius in kilometers
+            var dLat = deg2rad(lat2 - lat1);
+            var dLon = deg2rad(lon2 - lon1);
+            var a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            var distance = R * c;
+
+            return distance;
+        }
+
+        function deg2rad(deg) {
+            return deg * (Math.PI / 180);
+        }
+    </script>
+</body>
+</html>
